@@ -8,9 +8,11 @@
     "javascript-obfuscator": "latest",
     "js-confuser": "latest",
     "uglify-js": "latest",
-    "wrangler": "^3.105.1"
+    "wrangler": "^3.107.2"
   },
   "dependencies": {
-    "jose": "latest"
+    "jose": "latest",
+    "js-sha256": "latest",
+    "tweetnacl": "latest"
   }
 }
