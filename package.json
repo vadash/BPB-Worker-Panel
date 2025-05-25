@@ -18,7 +18,7 @@
 		"terser": "latest"
   },
   "dependencies": {
-    "jose": "latest",
+    "jose": "5.9.6",
     "js-sha256": "latest",
     "tweetnacl": "latest",
     "jszip": "latest"
