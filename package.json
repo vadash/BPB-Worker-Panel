@@ -1,18 +1,26 @@
 {
   "name": "mod-panel",
-  "version": "1.0.0",
+  "version": "3.2.7",
+  "type": "module",
   "author": {
     "name": "vadash"
   },
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
   "devDependencies": {
-    "javascript-obfuscator": "latest",
     "js-confuser": "latest",
     "uglify-js": "latest",
-    "wrangler": "^3.107.2"
+    "wrangler": "latest",
+		"esbuild": "latest",
+		"glob": "latest",
+		"html-minifier": "latest",
+		"terser": "latest"
   },
   "dependencies": {
     "jose": "latest",
     "js-sha256": "latest",
-    "tweetnacl": "latest"
+    "tweetnacl": "latest",
+    "jszip": "latest"
   }
 }

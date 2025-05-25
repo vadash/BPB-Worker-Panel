@@ -1,15 +1,47 @@
-import { resolveDNS, isDomain } from '../helpers/helpers';
+export function isDomain(address) {
+    const domainPattern = /^(?!\-)(?:[A-Za-z0-9\-]{1,63}\.)+[A-Za-z]{2,}$/;
+    return domainPattern.test(address);
+}
 
-export async function getConfigAddresses(cleanIPs, enableIPv6) {
-    const resolved = await resolveDNS(globalThis.hostName);
-    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
-    return [
-        globalThis.hostName,
+export async function resolveDNS(domain) {
+    const dohURL = 'https://cloudflare-dns.com/dns-query';
+    const dohURLv4 = `${dohURL}?name=${encodeURIComponent(domain)}&type=A`;
+    const dohURLv6 = `${dohURL}?name=${encodeURIComponent(domain)}&type=AAAA`;
+
+    try {
+        const [ipv4Response, ipv6Response] = await Promise.all([
+            fetch(dohURLv4, { headers: { accept: 'application/dns-json' } }),
+            fetch(dohURLv6, { headers: { accept: 'application/dns-json' } })
+        ]);
+
+        const ipv4Addresses = await ipv4Response.json();
+        const ipv6Addresses = await ipv6Response.json();
+
+        const ipv4 = ipv4Addresses.Answer
+            ? ipv4Addresses.Answer.map((record) => record.data)
+            : [];
+        const ipv6 = ipv6Addresses.Answer
+            ? ipv6Addresses.Answer.map((record) => record.data)
+            : [];
+
+        return { ipv4, ipv6 };
+    } catch (error) {
+        throw new Error(`Error resolving DNS: ${error}`);
+    }
+}
+
+export async function getConfigAddresses(cleanIPs, VLTRenableIPv6, customCdnAddrs, isFragment) {
+    const resolved = await resolveDNS(hostName);
+    const defaultIPv6 = VLTRenableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : [];
+    const addrs = [
+        hostName,
         'www.speedtest.net',
         ...resolved.ipv4,
         ...defaultIPv6,
-        ...(cleanIPs ? cleanIPs.split(',') : [])
+        ...cleanIPs
     ];
+    
+    return isFragment ? addrs : [...addrs, ...customCdnAddrs];
 }
 
 export function extractWireguardParams(warpConfigs, isWoW) {
@@ -74,4 +106,8 @@ export function getDomain(url) {
     const host = newUrl.hostname;
     const isHostDomain = isDomain(host);
     return {host, isHostDomain};
+}
+
+export function base64EncodeUnicode(str) {
+    return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
 }
